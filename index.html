@@ -5,34 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shopify POS — Total Cost of Ownership Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --brand-primary: #111111;
-    --brand-secondary: #F7F5F2;
-    --accent: #6EB69C;
-    --accent-bg: #EEF7F3;
+    --brand-primary: #0B66C3;
+    --brand-secondary: #D9E8FF;
+    --accent: #D0FC09;
+    --accent-bg: #FAFFE6;
     --surface: #FFFFFF;
-    --surface-2: #F7F5F2;
-    --surface-3: #ECECEC;
-    --border: #E3E3E3;
-    --text-primary: #111111;
-    --text-secondary: #444444;
-    --text-muted: #8F8F8F;
-    --accent-red: #C43D2A;
+    --surface-2: #D9E8FF;
+    --surface-3: #C2D8F7;
+    --border: #9DBDE8;
+    --text-primary: #000000;
+    --text-secondary: #12324F;
+    --text-muted: #3E6FA8;
+    --accent-red: #D12C2C;
     --accent-orange: #D97706;
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
     --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
     --shadow-lg: 0 12px 32px rgba(0,0,0,0.10);
-    --radius: 6px;
-    --radius-lg: 6px;
+    --radius: 4px;
+    --radius-lg: 4px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--surface-2);
     color: var(--text-primary);
     font-size: 14px;
@@ -108,10 +108,10 @@
     letter-spacing: 0.01em;
   }
   .btn-primary {
-    background: var(--brand-primary);
-    color: #ffffff;
+    background: #D0FC09;
+    color: #000000;
   }
-  .btn-primary:hover { background: #222222; }
+  .btn-primary:hover { background: #BBE308; }
   .btn-ghost {
     background: transparent;
     color: var(--brand-primary);
@@ -252,8 +252,8 @@
   }
   input:focus, select:focus {
     outline: none;
-    border-color: var(--brand-primary);
-    box-shadow: 0 0 0 2px rgba(17,17,17,0.08);
+    border-color: #0B66C3;
+    box-shadow: 0 0 0 2px rgba(11,102,195,0.10);
   }
   .input-prefix { position: relative; }
   .input-prefix span {
@@ -305,12 +305,12 @@
     box-shadow: var(--shadow-sm);
   }
   .summary-card.highlight {
-    background: var(--brand-primary);
-    border-color: var(--brand-primary);
+    background: #D0FC09;
+    border-color: #BBE308;
   }
-  .summary-card.highlight .summary-label { color: rgba(255,255,255,0.55); }
-  .summary-card.highlight .summary-value { color: #ffffff; }
-  .summary-card.highlight .summary-sub { color: rgba(255,255,255,0.45); }
+  .summary-card.highlight .summary-label { color: rgba(0,0,0,0.55); }
+  .summary-card.highlight .summary-value { color: #000000; }
+  .summary-card.highlight .summary-sub { color: rgba(0,0,0,0.50); }
   .summary-label {
     font-size: 10px;
     font-weight: 600;
@@ -327,7 +327,7 @@
     line-height: 1;
     margin-bottom: 6px;
   }
-  .summary-value.positive { color: var(--accent); }
+  .summary-value.positive { color: #0B66C3; }
   .summary-sub {
     font-size: 11px;
     color: var(--text-muted);
@@ -409,11 +409,11 @@
     border-top: 1px solid var(--border);
     border-bottom: none;
   }
-  .saving-cell { color: var(--accent); font-weight: 600; }
+  .saving-cell { color: #0B66C3; font-weight: 600; }
   .cost-current { color: var(--accent-red); }
   .badge-zero {
-    background: var(--accent-bg);
-    color: var(--accent);
+    background: #EBF3FA;
+    color: #0B66C3;
     font-size: 10px;
     font-weight: 700;
     padding: 2px 7px;
@@ -543,7 +543,7 @@
   .timeline-year-value {
     font-size: 22px;
     font-weight: 700;
-    color: var(--accent);
+    color: #0B66C3;
     letter-spacing: -0.02em;
   }
   .timeline-year-cumulative {
@@ -555,8 +555,8 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: var(--brand-primary);
-    color: #ffffff;
+    background: #D0FC09;
+    color: #000000;
     font-size: 11px;
     font-weight: 600;
     padding: 7px 16px;
@@ -567,7 +567,7 @@
 
   /* ── FOOTER ── */
   .footer {
-    background: var(--brand-primary);
+    background: #0A1A2B;
     color: rgba(255,255,255,0.45);
     text-align: center;
     padding: 24px 40px;
@@ -647,7 +647,7 @@
     color: var(--text-primary);
     transition: border-color 0.15s;
   }
-  .pw-input:focus { outline: none; border-color: var(--accent); }
+  .pw-input:focus { outline: none; border-color: #0B66C3; }
   .pw-input.shake {
     animation: shake 0.35s ease;
     border-color: var(--accent-red);
@@ -668,8 +668,8 @@
   .pw-btn {
     width: 100%;
     padding: 11px;
-    background: var(--brand-primary);
-    color: #fff;
+    background: #D0FC09;
+    color: #000000;
     border: none;
     border-radius: var(--radius);
     font-size: 13px;
@@ -686,7 +686,7 @@
     position: fixed;
     inset: 0;
     z-index: 9998;
-    background: rgba(17,17,17,0.55);
+    background: rgba(11,102,195,0.40);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -741,8 +741,8 @@
   .instructions-btn {
     width: 100%;
     padding: 12px;
-    background: var(--brand-primary);
-    color: #fff;
+    background: #D0FC09;
+    color: #000000;
     border: none;
     border-radius: var(--radius);
     font-size: 13px;
@@ -761,7 +761,7 @@
 <div id="pw-gate">
   <div class="pw-box">
     <div class="pw-logos">
-      <span style="font-size:15px;font-weight:700;letter-spacing:-0.01em;color:var(--text-primary)">The Running Company</span>
+      <img src="https://www.therunningcompany.com.au/wp-content/uploads/2024/08/logo.svg" alt="The Running Company" style="height:28px;object-fit:contain;">
       <div class="pw-logos-divider"></div>
       <svg width="18" height="20" viewBox="0 0 109 124" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M74.7 14.8c0 0-1.4 0.4-3.7 1.1c-0.4-1.3-1-2.8-1.8-4.4c-2.7-5.1-6.6-7.8-11.3-7.8c-0.3 0-0.7 0-1 0.1c-0.1-0.2-0.3-0.3-0.4-0.5c-2.1-2.2-4.7-3.3-7.9-3.2C41.4 0.3 34.2 6 30.5 15.1c-2.4 6.1-3.4 12.2-3.7 17.1c-6.8 2.1-11.6 3.6-11.7 3.6c-3.4 1.1-3.5 1.2-4 4.4c-0.3 2.4-9.1 70.1-9.1 70.1L75 124V14.3C75 14.5 74.8 14.6 74.7 14.8L74.7 14.8z" fill="#111111"/><path d="M75 124l33.1-8.3c0 0-14.3-96.8-14.4-97.4c-0.1-0.6-0.6-1-1.2-1c-0.5 0-10.1-0.2-10.1-0.2s-5.8-5.6-8-7.8L75 124z" fill="#111111"/></svg>
       <span style="font-size:13px;font-weight:700;color:var(--brand-primary);">Shopify</span>
@@ -797,7 +797,7 @@
 <!-- ── HEADER ── -->
 <header class="header">
   <div class="header-brand">
-    <span style="font-size:15px;font-weight:700;letter-spacing:-0.01em;color:var(--text-primary)">The Running Company</span>
+    <img class="header-merchant-logo" src="https://www.therunningcompany.com.au/wp-content/uploads/2024/08/logo.svg" alt="The Running Company">
     <div class="header-divider"></div>
     <div class="header-shopify">
       <svg class="shopify-logo" viewBox="0 0 109 124" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1245,8 +1245,8 @@
           <div class="chart-subtitle">Current POS setup vs. Shopify POS (Year 1)</div>
         </div>
         <div class="chart-legend">
-          <span><span class="legend-dot" style="background:#111111"></span>Current</span>
-          <span><span class="legend-dot" style="background:#6EB69C"></span>Shopify POS</span>
+          <span><span class="legend-dot" style="background:#0A1A2B"></span>Current</span>
+          <span><span class="legend-dot" style="background:#0B66C3"></span>Shopify POS</span>
         </div>
       </div>
       <div class="chart-wrap" style="height:280px;">
@@ -1284,7 +1284,7 @@
           <div class="chart-subtitle">Incremental revenue opportunity by unified commerce factor</div>
         </div>
         <div class="chart-legend">
-          <span><span class="legend-dot" style="background:#6EB69C"></span>Revenue uplift</span>
+          <span><span class="legend-dot" style="background:#0B66C3"></span>Revenue uplift</span>
         </div>
       </div>
       <div class="chart-wrap" style="height:200px;">
@@ -1321,8 +1321,8 @@
           <div class="chart-subtitle">Cost savings + revenue upside, cumulative</div>
         </div>
         <div class="chart-legend">
-          <span><span class="legend-dot" style="background:#111111"></span>Cost savings</span>
-          <span><span class="legend-dot" style="background:#6EB69C"></span>Revenue upside</span>
+          <span><span class="legend-dot" style="background:#0B66C3"></span>Cost savings</span>
+          <span><span class="legend-dot" style="background:#D0FC09"></span>Revenue upside</span>
         </div>
       </div>
       <div class="chart-wrap">
@@ -1839,16 +1839,16 @@ function updateCostChart(rows, totalCurr, totalShopify) {
         {
           label: 'Current',
           data: currValues,
-          backgroundColor: 'rgba(17,17,17,0.80)',
-          borderColor: '#111111',
+          backgroundColor: 'rgba(10,26,43,0.80)',
+          borderColor: '#0A1A2B',
           borderWidth: 1,
           borderRadius: 3,
         },
         {
           label: 'Shopify POS',
           data: shopifyValues,
-          backgroundColor: 'rgba(110,182,156,0.85)',
-          borderColor: '#6EB69C',
+          backgroundColor: 'rgba(11,102,195,0.85)',
+          borderColor: '#0B66C3',
           borderWidth: 1,
           borderRadius: 3,
         }
@@ -1869,7 +1869,7 @@ function updateCostChart(rows, totalCurr, totalShopify) {
         x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 0 } },
         y: {
           ticks: { font: { size: 11 }, callback: (v) => '$' + (v >= 1000 ? Math.round(v/1000) + 'K' : v) },
-          grid: { color: '#ECECEC' }
+          grid: { color: '#BFD5F3' }
         }
       }
     }
@@ -1889,8 +1889,8 @@ function updateRevenueChart(rows) {
       datasets: [{
         label: 'Annual Revenue Upside',
         data: values,
-        backgroundColor: 'rgba(110,182,156,0.85)',
-        borderColor: '#6EB69C',
+        backgroundColor: 'rgba(11,102,195,0.85)',
+        borderColor: '#0B66C3',
         borderWidth: 1,
         borderRadius: 4,
       }]
@@ -1909,7 +1909,7 @@ function updateRevenueChart(rows) {
       },
       scales: {
         x: {
-          grid: { color: '#ECECEC' },
+          grid: { color: '#BFD5F3' },
           ticks: { font: { size: 11 }, callback: (v) => '$' + (v >= 1000 ? Math.round(v/1000) + 'K' : v) }
         },
         y: {
@@ -1939,8 +1939,8 @@ function updateSavingsChart(yr1, yr2, yr3, revUpside) {
         {
           label: 'Cost savings',
           data: [cumCost1, cumCost2, cumCost3],
-          backgroundColor: 'rgba(17,17,17,0.80)',
-          borderColor: '#111111',
+          backgroundColor: 'rgba(11,102,195,0.85)',
+          borderColor: '#0B66C3',
           borderWidth: 1,
           borderRadius: 3,
           stack: 'benefit',
@@ -1948,8 +1948,8 @@ function updateSavingsChart(yr1, yr2, yr3, revUpside) {
         {
           label: 'Revenue upside',
           data: [cumRev1, cumRev2, cumRev3],
-          backgroundColor: 'rgba(110,182,156,0.85)',
-          borderColor: '#6EB69C',
+          backgroundColor: 'rgba(208,252,9,0.90)',
+          borderColor: '#D0FC09',
           borderWidth: 1,
           borderRadius: 3,
           stack: 'benefit',
@@ -1972,7 +1972,7 @@ function updateSavingsChart(yr1, yr2, yr3, revUpside) {
         y: {
           stacked: true,
           ticks: { font: { size: 11 }, callback: (v) => '$' + (Math.abs(v) >= 1000 ? Math.round(v/1000) + 'K' : v) },
-          grid: { color: '#ECECEC' }
+          grid: { color: '#BFD5F3' }
         }
       }
     }
@@ -1982,13 +1982,13 @@ function updateSavingsChart(yr1, yr2, yr3, revUpside) {
 function resetForm() {
   document.getElementById('num_locations').value = 3;
   document.getElementById('ecom_gmv').value = 5000000;
-  document.getElementById('store_gmv').value = 2000000;
+  document.getElementById('store_gmv').value = 25000000;
   document.getElementById('ecom_vpf').value = 0.25;
-  document.getElementById('store_vpf').value = 0.20;
+  document.getElementById('store_vpf').value = 0.25;
   document.getElementById('shopify_it_support').value = 3300;
   document.getElementById('shopify_integration').value = 0;
-  document.getElementById('current_payments_rate').value = 1.75;
-  document.getElementById('shopify_payments_rate').value = 1.40;
+  document.getElementById('current_payments_rate').value = 0.72;
+  document.getElementById('shopify_payments_rate').value = 0.97;
   document.getElementById('hardware_cost').value = 2500;
   document.getElementById('hardware_discount').value = 0;
   document.getElementById('staff_per_store').value = 5;
