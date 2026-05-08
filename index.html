@@ -1,0 +1,2014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopify POS — Total Cost of Ownership Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --brand-primary: #111111;
+    --brand-secondary: #F7F5F2;
+    --accent: #6EB69C;
+    --accent-bg: #EEF7F3;
+    --surface: #FFFFFF;
+    --surface-2: #F7F5F2;
+    --surface-3: #ECECEC;
+    --border: #E3E3E3;
+    --text-primary: #111111;
+    --text-secondary: #444444;
+    --text-muted: #8F8F8F;
+    --accent-red: #C43D2A;
+    --accent-orange: #D97706;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.10);
+    --radius: 6px;
+    --radius-lg: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header-merchant-logo {
+    height: 26px;
+    object-fit: contain;
+  }
+  .header-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+  }
+  .header-shopify {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .shopify-logo {
+    width: 20px;
+    height: 23px;
+  }
+  .header-shopify-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--brand-primary);
+    letter-spacing: -0.01em;
+  }
+  .header-subtitle {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    padding: 7px 14px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 150ms cubic-bezier(0.4,0,0.2,1);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+    letter-spacing: 0.01em;
+  }
+  .btn-primary {
+    background: var(--brand-primary);
+    color: #ffffff;
+  }
+  .btn-primary:hover { background: #222222; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--brand-primary);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--brand-primary); }
+
+  /* ── HERO BAND ── */
+  .hero-band {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 36px 40px;
+    color: var(--text-primary);
+  }
+  .hero-band h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+    color: var(--brand-primary);
+  }
+  .hero-band p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    max-width: 560px;
+    line-height: 1.6;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .hero-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--brand-primary);
+    letter-spacing: -0.03em;
+  }
+  .hero-stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .hero-stat-source {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 40px 60px;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card + .card { margin-top: 16px; }
+  .card-title {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title-icon {
+    width: 18px;
+    height: 18px;
+    background: var(--surface-3);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .form-group { margin-bottom: 18px; }
+  .form-group:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+  }
+  label .hint {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-left: 4px;
+  }
+  input[type="number"],
+  input[type="text"],
+  select {
+    width: 100%;
+    padding: 8px 11px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--surface);
+    transition: border-color 150ms;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238F8F8F' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 2px rgba(17,17,17,0.08);
+  }
+  .input-prefix { position: relative; }
+  .input-prefix span {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 12px;
+    pointer-events: none;
+  }
+  .input-prefix input { padding-left: 24px; }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .form-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+  .vendor-defaults-note {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 10px;
+    display: none;
+  }
+
+  /* ── RESULTS COLUMN ── */
+  .results-col { min-width: 0; }
+
+  /* ── SUMMARY CARDS ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .summary-card.highlight {
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+  }
+  .summary-card.highlight .summary-label { color: rgba(255,255,255,0.55); }
+  .summary-card.highlight .summary-value { color: #ffffff; }
+  .summary-card.highlight .summary-sub { color: rgba(255,255,255,0.45); }
+  .summary-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .summary-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .summary-value.positive { color: var(--accent); }
+  .summary-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* ── CHART CARDS ── */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+  }
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+  .chart-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+  .chart-legend {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+  .chart-wrap {
+    position: relative;
+    height: 220px;
+  }
+
+  /* ── BREAKDOWN TABLE ── */
+  .breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .breakdown-table th {
+    text-align: left;
+    padding: 9px 14px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .breakdown-table th:not(:first-child) { text-align: right; }
+  .breakdown-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--surface-3);
+    color: var(--text-primary);
+  }
+  .breakdown-table td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+  .breakdown-table tr:last-child td { border-bottom: none; }
+  .breakdown-table .total-row td {
+    font-weight: 700;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .saving-cell { color: var(--accent); font-weight: 600; }
+  .cost-current { color: var(--accent-red); }
+  .badge-zero {
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 9999px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── VERSIONS BAR ── */
+  .versions-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .versions-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    margin-right: 2px;
+  }
+  .versions-select {
+    flex: 1;
+    max-width: 280px;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text-primary);
+  }
+  .versions-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+  .version-name-input {
+    flex: 1;
+    max-width: 240px;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text-primary);
+  }
+  .version-name-input:focus, .versions-select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .btn-sm {
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+  .versions-saved-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ── INSIGHTS SECTION ── */
+  .insights-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .insight-icon { font-size: 18px; margin-bottom: 10px; }
+  .insight-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .insight-body {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ── ROI TIMELINE ── */
+  .roi-timeline {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    margin-top: 16px;
+  }
+  .timeline-years {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .timeline-year {
+    text-align: center;
+    padding: 18px 16px;
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .timeline-year-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .timeline-year-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .timeline-year-cumulative {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 5px;
+  }
+  .payback-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--brand-primary);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 9999px;
+    margin-top: 16px;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--brand-primary);
+    color: rgba(255,255,255,0.45);
+    text-align: center;
+    padding: 24px 40px;
+    font-size: 11px;
+    line-height: 1.7;
+    margin-top: 40px;
+  }
+  .footer a { color: rgba(255,255,255,0.65); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    body { background: #fff; }
+    .header { position: static; background: var(--surface) !important; }
+    .header-actions { display: none; }
+    .hero-band { break-inside: avoid; }
+    .main { grid-template-columns: 1fr; max-width: 100%; padding: 20px; }
+    .inputs-col { display: none; }
+    .card, .chart-card, .insight-card, .roi-timeline { break-inside: avoid; }
+    .summary-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .chart-wrap { height: 180px; }
+    .footer { margin-top: 20px; }
+    @page { margin: 0.5in; size: letter landscape; }
+  }
+  /* ── PASSWORD GATE ── */
+  #pw-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pw-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 48px 44px;
+    width: 360px;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+  }
+  .pw-logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .pw-logos img { height: 22px; object-fit: contain; }
+  .pw-logos-divider { width: 1px; height: 20px; background: var(--border); }
+  .pw-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+  .pw-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+  .pw-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: inherit;
+    margin-bottom: 12px;
+    letter-spacing: 0.08em;
+    text-align: center;
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: border-color 0.15s;
+  }
+  .pw-input:focus { outline: none; border-color: var(--accent); }
+  .pw-input.shake {
+    animation: shake 0.35s ease;
+    border-color: var(--accent-red);
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  .pw-error {
+    font-size: 11px;
+    color: var(--accent-red);
+    margin-bottom: 12px;
+    min-height: 16px;
+  }
+  .pw-btn {
+    width: 100%;
+    padding: 11px;
+    background: var(--brand-primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: opacity 0.15s;
+  }
+  .pw-btn:hover { opacity: 0.85; }
+
+  /* ── INSTRUCTIONS OVERLAY ── */
+  #instructions-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(17,17,17,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .instructions-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 44px 48px;
+    width: 540px;
+    max-width: 92vw;
+    box-shadow: var(--shadow-lg);
+  }
+  .instructions-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .instructions-body {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+  .instructions-body p { margin-bottom: 14px; }
+  .instructions-body p:last-child { margin-bottom: 0; }
+  .instructions-list {
+    margin: 12px 0 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .instructions-list li {
+    padding: 7px 0;
+    border-bottom: 1px solid var(--surface-3);
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 10px;
+  }
+  .instructions-list li:last-child { border-bottom: none; }
+  .instructions-list li strong { color: var(--text-primary); min-width: 180px; }
+  .instructions-disclaimer {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .instructions-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--brand-primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: opacity 0.15s;
+  }
+  .instructions-btn:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<!-- ── PASSWORD GATE ── -->
+<div id="pw-gate">
+  <div class="pw-box">
+    <div class="pw-logos">
+      <span style="font-size:15px;font-weight:700;letter-spacing:-0.01em;color:var(--text-primary)">The Running Company</span>
+      <div class="pw-logos-divider"></div>
+      <svg width="18" height="20" viewBox="0 0 109 124" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M74.7 14.8c0 0-1.4 0.4-3.7 1.1c-0.4-1.3-1-2.8-1.8-4.4c-2.7-5.1-6.6-7.8-11.3-7.8c-0.3 0-0.7 0-1 0.1c-0.1-0.2-0.3-0.3-0.4-0.5c-2.1-2.2-4.7-3.3-7.9-3.2C41.4 0.3 34.2 6 30.5 15.1c-2.4 6.1-3.4 12.2-3.7 17.1c-6.8 2.1-11.6 3.6-11.7 3.6c-3.4 1.1-3.5 1.2-4 4.4c-0.3 2.4-9.1 70.1-9.1 70.1L75 124V14.3C75 14.5 74.8 14.6 74.7 14.8L74.7 14.8z" fill="#111111"/><path d="M75 124l33.1-8.3c0 0-14.3-96.8-14.4-97.4c-0.1-0.6-0.6-1-1.2-1c-0.5 0-10.1-0.2-10.1-0.2s-5.8-5.6-8-7.8L75 124z" fill="#111111"/></svg>
+      <span style="font-size:13px;font-weight:700;color:var(--brand-primary);">Shopify</span>
+    </div>
+    <div class="pw-title">POS Total Cost of Ownership</div>
+    <div class="pw-subtitle">This calculator is confidential.<br>Enter the access password to continue.</div>
+    <input type="password" class="pw-input" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')checkPassword()">
+    <div class="pw-error" id="pw-error"></div>
+    <button class="pw-btn" onclick="checkPassword()">Access Calculator</button>
+  </div>
+</div>
+
+<!-- ── INSTRUCTIONS OVERLAY ── -->
+<div id="instructions-gate" style="display:none;">
+  <div class="instructions-box">
+    <div class="instructions-title">How to use this calculator</div>
+    <div class="instructions-body">
+      <p>The inputs are pre-populated with industry benchmarks — they're a starting framework, not your numbers yet. Review each assumption together and update them to reflect your actual costs and contracts. When the inputs are accurate, the output becomes a business case you can take internally.</p>
+      <strong style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Key assumptions to validate</strong>
+      <ul class="instructions-list">
+        <li><strong>Unified commerce upside</strong> Benchmarked from Shopify merchant data — adjust if your customer behaviour differs</li>
+        <li><strong>Current POS costs</strong> Use your actual contract value, not list price</li>
+        <li><strong>Payment processing rates</strong> Enter your blended rate across all tender types</li>
+        <li><strong>Implementation costs</strong> Confirm with your SI or internal IT team</li>
+        <li><strong>Hardware</strong> Adjust based on existing infrastructure and planned rollout</li>
+      </ul>
+    </div>
+    <div class="instructions-disclaimer">Results are indicative. Final savings depend on your contracts, usage patterns, and how Shopify POS is implemented.</div>
+    <button class="instructions-btn" onclick="dismissInstructions()">Got it — let's start</button>
+  </div>
+</div>
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="header-brand">
+    <span style="font-size:15px;font-weight:700;letter-spacing:-0.01em;color:var(--text-primary)">The Running Company</span>
+    <div class="header-divider"></div>
+    <div class="header-shopify">
+      <svg class="shopify-logo" viewBox="0 0 109 124" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M74.7 14.8c0 0-1.4 0.4-3.7 1.1c-0.4-1.3-1-2.8-1.8-4.4c-2.7-5.1-6.6-7.8-11.3-7.8c-0.3 0-0.7 0-1 0.1c-0.1-0.2-0.3-0.3-0.4-0.5c-2.1-2.2-4.7-3.3-7.9-3.2C41.4 0.3 34.2 6 30.5 15.1c-2.4 6.1-3.4 12.2-3.7 17.1c-6.8 2.1-11.6 3.6-11.7 3.6c-3.4 1.1-3.5 1.2-4 4.4c-0.3 2.4-9.1 70.1-9.1 70.1L75 124V14.3C75 14.5 74.8 14.6 74.7 14.8L74.7 14.8z" fill="#111111"/>
+        <path d="M75 124l33.1-8.3c0 0-14.3-96.8-14.4-97.4c-0.1-0.6-0.6-1-1.2-1c-0.5 0-10.1-0.2-10.1-0.2s-5.8-5.6-8-7.8L75 124z" fill="#111111"/>
+      </svg>
+      <span class="header-shopify-name">Shopify</span>
+    </div>
+    <div class="header-divider"></div>
+    <span class="header-subtitle">POS Total Cost of Ownership</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="resetForm()">↺ Reset</button>
+    <button class="btn btn-primary" onclick="window.print()">⬇ Export PDF</button>
+  </div>
+</header>
+
+<!-- ── VERSIONS BAR ── -->
+<div class="versions-bar">
+  <span class="versions-label">Versions</span>
+  <select class="versions-select" id="versions_select">
+    <option value="">— No saved versions —</option>
+  </select>
+  <button class="btn btn-ghost btn-sm" onclick="loadSelectedVersion()">Load</button>
+  <button class="btn btn-ghost btn-sm" onclick="deleteSelectedVersion()">Delete</button>
+  <div class="versions-divider"></div>
+  <input type="text" class="version-name-input" id="version_name_input" placeholder="Name this version…">
+  <button class="btn btn-primary btn-sm" onclick="saveCurrentVersion()">Save</button>
+  <span class="versions-saved-count" id="versions_count"></span>
+</div>
+
+<!-- ── HERO BAND ── -->
+<div class="hero-band">
+  <h1>How much could you save switching to Shopify POS?</h1>
+  <p>Built for existing Shopify Plus merchants. See your real 3-year savings from consolidating your ecommerce and in-store systems on one unified platform.</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-value">8.9%</div>
+      <div class="hero-stat-label">Average GMV Uplift</div>
+      <div class="hero-stat-source">Shopify Merchant Research</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">89%</div>
+      <div class="hero-stat-label">Lower Support Costs</div>
+      <div class="hero-stat-source">vs. third-party POS vendors</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">16%</div>
+      <div class="hero-stat-label">Lower Ongoing Costs</div>
+      <div class="hero-stat-source">vs. standalone POS systems</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">21%</div>
+      <div class="hero-stat-label">Lower Training Costs</div>
+      <div class="hero-stat-source">per store, vs. competitors</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- ── INPUTS ── -->
+  <div class="inputs-col">
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon">🏪</span>
+        Your Business
+      </div>
+
+      <div class="form-group">
+        <label>Industry / Vertical</label>
+        <select id="industry" onchange="updateCalc()">
+          <option value="fashion">Fashion & Apparel</option>
+          <option value="homeware">Homeware & Furniture</option>
+          <option value="beauty">Beauty & Health</option>
+          <option value="electronics">Electronics & Tech</option>
+          <option value="sporting">Sporting Goods</option>
+          <option value="food">Food & Beverage</option>
+          <option value="other">Other Retail</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Number of retail locations</label>
+        <input type="number" id="num_locations" value="3" min="1" max="500" onchange="updateCalc()" oninput="updateCalc()">
+      </div>
+
+      <div class="form-group">
+        <label>Staff per location <span class="hint">(avg)</span></label>
+        <input type="number" id="staff_per_store" value="5" min="1" max="200" onchange="updateCalc()" oninput="updateCalc()">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon">💳</span>
+        Current POS Investment
+      </div>
+
+      <div class="form-group">
+        <label>Current POS vendor</label>
+        <select id="vendor" onchange="onVendorChange()">
+          <option value="lightspeed">Lightspeed / Vend</option>
+          <option value="square">Square for Retail</option>
+          <option value="myob">MYOB Advanced Retail</option>
+          <option value="aptos">Aptos</option>
+          <option value="newstore">NewStore</option>
+          <option value="teamwork">Teamwork Commerce</option>
+          <option value="retail_pro">Retail Pro</option>
+          <option value="kwi">KWI</option>
+          <option value="other">Other / Custom</option>
+        </select>
+        <div class="vendor-defaults-note" id="vendor_note"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Annual POS cost <span class="hint">(AUD)</span></label>
+          <div class="input-prefix"><span>$</span>
+            <input type="number" id="pos_cost_per_store" value="9000" min="0" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Annual integration <span class="hint">(AUD)</span></label>
+          <div class="input-prefix"><span>$</span>
+            <input type="number" id="middleware_cost" value="4560" min="0" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Annual IT / support cost <span class="hint">(total)</span></label>
+          <div class="input-prefix"><span>$</span>
+            <input type="number" id="it_support" value="30000" min="0" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Annual training cost <span class="hint">(AUD)</span></label>
+          <div class="input-prefix"><span>$</span>
+            <input type="number" id="training_per_store" value="4500" min="0" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+      </div>
+
+      <hr class="form-divider">
+
+      <div class="form-group">
+        <label>Contract term remaining <span class="hint">(months)</span></label>
+        <input type="number" id="contract_remaining" value="0" min="0" max="60" onchange="updateCalc()" oninput="updateCalc()">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon">🛒</span>
+        Shopify POS Set Up
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Implementation cost <span class="hint">(one-off)</span></label>
+          <div class="input-prefix"><span>$</span>
+            <input type="number" id="implementation_cost" value="5000" min="0" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Annual training cost <span class="hint">(AUD)</span></label>
+          <div class="input-prefix"><span>$</span>
+            <input type="number" id="shopify_training" value="1200" min="0" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Annual IT / Support costs</label>
+          <div class="input-prefix"><span>$</span>
+            <input type="number" id="shopify_it_support" value="3300" min="0" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:5px;">Typically ~89% lower than your current IT/support spend.</div>
+        </div>
+        <div class="form-group">
+          <label>Annual integration costs</label>
+          <div class="input-prefix"><span>$</span>
+            <input type="number" id="shopify_integration" value="0" min="0" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:5px;">$0 for existing Plus merchants — ecom and POS share one platform.</div>
+        </div>
+      </div>
+
+      <div style="background:var(--accent-bg);border:1px solid var(--border);border-radius:3px;padding:12px;font-size:11px;color:var(--text-secondary);margin-top:4px;">
+        <strong>Already on Shopify Plus?</strong> Your ecommerce and POS share the same admin, inventory, customer records, and reporting — no middleware required.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon">📈</span>
+        Shopify Platform Investment
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Annual eCommerce GMV <span class="hint">(AUD)</span></label>
+          <div class="input-prefix"><span>$</span>
+            <input type="number" id="ecom_gmv" value="5000000" min="0" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Annual in-store GMV <span class="hint">(AUD)</span></label>
+          <div class="input-prefix"><span>$</span>
+            <input type="number" id="store_gmv" value="25000000" min="0" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>eCommerce D2C VPF <span class="hint">(%)</span></label>
+          <div class="input-prefix"><span>%</span>
+            <input type="number" id="ecom_vpf" value="0.25" min="0" step="0.01" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>In-store VPF <span class="hint">(%)</span></label>
+          <div class="input-prefix"><span>%</span>
+            <input type="number" id="store_vpf" value="0.25" min="0" step="0.01" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+      </div>
+
+      <hr class="form-divider">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Annual eCommerce Platform Cost</label>
+          <div style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:3px;font-size:13px;font-weight:600;color:var(--text-primary)" id="ecom_platform_cost_display">$0</div>
+        </div>
+        <div class="form-group">
+          <label>Annual In-store Platform Cost</label>
+          <div style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:3px;font-size:13px;font-weight:600;color:var(--text-primary)" id="store_platform_cost_display">$0</div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:12px;">
+        <label>Shopify POS Platform Cost Only</label>
+        <div style="padding:11px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:15px;font-weight:700;color:var(--text-primary)" id="total_platform_cost_display">$0</div>
+      </div>
+
+      <div class="form-group" style="margin-top:8px;">
+        <label>Total Savings <span class="hint">vs. standard retail VPF (0.25%)</span></label>
+        <div style="padding:11px 14px;background:var(--brand-primary);border-radius:3px;font-size:15px;font-weight:700;color:#ffffff" id="platform_savings_display">$0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon">💰</span>
+        Shopify Payments Investment
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Current blended rate <span class="hint">(%)</span></label>
+          <div class="input-prefix"><span>%</span>
+            <input type="number" id="current_payments_rate" value="0.72" min="0" step="0.01" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Shopify Payments blended rate <span class="hint">(%)</span></label>
+          <div class="input-prefix"><span>%</span>
+            <input type="number" id="shopify_payments_rate" value="0.97" min="0" step="0.01" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+      </div>
+
+      <hr class="form-divider">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Current payment investment</label>
+          <div style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:3px;font-size:13px;font-weight:600;color:var(--text-primary)" id="current_payments_display">$0</div>
+        </div>
+        <div class="form-group">
+          <label>Shopify Payments investment</label>
+          <div style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:3px;font-size:13px;font-weight:600;color:var(--accent)" id="shopify_payments_display">$0</div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:8px;">
+        <label>Total Savings <span class="hint">vs. standard rate (+0.25%)</span></label>
+        <div style="padding:11px 14px;background:var(--brand-primary);border-radius:3px;font-size:15px;font-weight:700;color:#ffffff" id="payments_savings_display">$0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon">🖥️</span>
+        POS Hardware Investment
+      </div>
+
+      <div class="form-group">
+        <label>Total Hardware Cost <span class="hint">(AUD)</span></label>
+        <div class="input-prefix"><span>$</span>
+          <input type="number" id="hardware_cost" value="2500" min="0" onchange="updateCalc()" oninput="updateCalc()">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Discount <span class="hint">(%)</span></label>
+        <div class="input-prefix"><span>%</span>
+          <input type="number" id="hardware_discount" value="0" min="0" max="100" step="1" onchange="updateCalc()" oninput="updateCalc()">
+        </div>
+      </div>
+
+      <hr class="form-divider">
+
+      <div class="form-group">
+        <label>Total Hardware Investment</label>
+        <div style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;font-size:14px;font-weight:700;color:var(--text-primary)" id="hardware_total_display">$0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="card-title-icon">📈</span>
+        Revenue Upside
+      </div>
+
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Adjust the benchmarks below to model your expected revenue upside from unified commerce. All figures are incremental to your current baseline.</div>
+
+      <div class="form-group">
+        <label>Unified Commerce GMV lift <span class="hint">% of in-store GMV</span></label>
+        <div class="input-prefix"><span>%</span>
+          <input type="number" id="rev_gmv_lift" value="8.9" min="0" step="0.1" onchange="updateCalc()" oninput="updateCalc()">
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Shopify avg. uplift from unified inventory, BOPIS, ship-from-store, and loyalty.</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>BOPIS adoption <span class="hint">% of eComm GMV</span></label>
+          <div class="input-prefix"><span>%</span>
+            <input type="number" id="rev_bopis_adoption" value="5" min="0" step="0.5" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>BOPIS AOV premium <span class="hint">%</span></label>
+          <div class="input-prefix"><span>%</span>
+            <input type="number" id="rev_bopis_aov" value="15" min="0" step="1" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:-10px;margin-bottom:16px;">Click & Collect orders typically carry a 13–20% higher AOV vs standard online orders.</div>
+
+      <div class="form-group">
+        <label>Lost sales recovery <span class="hint">% of in-store GMV</span></label>
+        <div class="input-prefix"><span>%</span>
+          <input type="number" id="rev_lost_sales" value="3" min="0" step="0.5" onchange="updateCalc()" oninput="updateCalc()">
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Ship-from-store & unified inventory reduce stockout-driven lost sales.</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cross-channel customers <span class="hint">% of base</span></label>
+          <div class="input-prefix"><span>%</span>
+            <input type="number" id="rev_cross_channel_pct" value="15" min="0" step="1" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>LTV premium <span class="hint">%</span></label>
+          <div class="input-prefix"><span>%</span>
+            <input type="number" id="rev_ltv_premium" value="25" min="0" step="1" onchange="updateCalc()" oninput="updateCalc()">
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:-10px;">Cross-channel customers spend 20–30% more over their lifetime vs single-channel.</div>
+    </div>
+
+    <div class="card" style="border:2px solid var(--brand-primary);">
+      <div class="card-title" style="color:var(--brand-primary);">
+        <span class="card-title-icon" style="background:var(--brand-primary);color:#fff;">🏷️</span>
+        Total Shopify Discount
+      </div>
+
+      <div class="form-group">
+        <label>Platform Investment Savings</label>
+        <div style="padding:9px 12px;background:var(--accent-bg);border:1px solid var(--border);border-radius:3px;font-size:13px;font-weight:600;color:var(--accent)" id="summary_platform_savings">$0</div>
+      </div>
+
+      <div class="form-group">
+        <label>Payments Savings</label>
+        <div style="padding:9px 12px;background:var(--accent-bg);border:1px solid var(--border);border-radius:3px;font-size:13px;font-weight:600;color:var(--accent)" id="summary_payments_savings">$0</div>
+      </div>
+
+      <div class="form-group">
+        <label>Hardware Discount</label>
+        <div style="padding:9px 12px;background:var(--accent-bg);border:1px solid var(--border);border-radius:3px;font-size:13px;font-weight:600;color:var(--accent)" id="summary_hardware_discount">$0</div>
+      </div>
+
+      <hr class="form-divider">
+
+      <div class="form-group">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Total Annual Shopify Discount</label>
+        <div style="padding:16px;background:var(--brand-primary);border-radius:6px;font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.03em;" id="total_shopify_discount">$0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESULTS ── -->
+  <div class="results-col">
+
+    <!-- Summary Cards -->
+    <div class="summary-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+      <div class="summary-card highlight">
+        <div class="summary-label">3-Year Net Benefit</div>
+        <div class="summary-value" id="out_3yr_net">$0</div>
+        <div class="summary-sub" id="out_3yr_sub">vs. current setup</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Annual Cost Saving</div>
+        <div class="summary-value positive" id="out_yr1_savings">$0</div>
+        <div class="summary-sub" id="out_yr1_sub">cost reduction</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Annual Revenue Upside</div>
+        <div class="summary-value positive" id="out_rev_upside">$0</div>
+        <div class="summary-sub" id="out_rev_sub">across all factors</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">GMV Lift (in-store)</div>
+        <div class="summary-value positive" id="out_gmv_uplift">$0</div>
+        <div class="summary-sub" id="out_gmv_sub">unified commerce uplift</div>
+      </div>
+    </div>
+
+    <!-- Annual Cost Comparison Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Annual Cost Breakdown</div>
+          <div class="chart-subtitle">Current POS setup vs. Shopify POS (Year 1)</div>
+        </div>
+        <div class="chart-legend">
+          <span><span class="legend-dot" style="background:#111111"></span>Current</span>
+          <span><span class="legend-dot" style="background:#6EB69C"></span>Shopify POS</span>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:280px;">
+        <canvas id="costCompareChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Breakdown Table -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Cost Breakdown — Annual</div>
+          <div class="chart-subtitle">Line-by-line comparison</div>
+        </div>
+      </div>
+      <table class="breakdown-table">
+        <thead>
+          <tr>
+            <th>Cost Category</th>
+            <th>Current (p.a.)</th>
+            <th>Shopify POS (p.a.)</th>
+            <th>Annual Saving</th>
+          </tr>
+        </thead>
+        <tbody id="breakdown_body">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Revenue Upside Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Revenue Upside — Annual</div>
+          <div class="chart-subtitle">Incremental revenue opportunity by unified commerce factor</div>
+        </div>
+        <div class="chart-legend">
+          <span><span class="legend-dot" style="background:#6EB69C"></span>Revenue uplift</span>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="revenueChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Revenue Upside Breakdown Table -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Revenue Upside — Breakdown</div>
+          <div class="chart-subtitle">Annual incremental revenue by factor</div>
+        </div>
+      </div>
+      <table class="breakdown-table">
+        <thead>
+          <tr>
+            <th>Revenue Factor</th>
+            <th>Assumption</th>
+            <th>Annual Uplift</th>
+            <th>3-Year Total</th>
+          </tr>
+        </thead>
+        <tbody id="revenue_breakdown_body"></tbody>
+      </table>
+    </div>
+
+    <!-- 3-Year Benefit Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">3-Year Cumulative Benefit</div>
+          <div class="chart-subtitle">Cost savings + revenue upside, cumulative</div>
+        </div>
+        <div class="chart-legend">
+          <span><span class="legend-dot" style="background:#111111"></span>Cost savings</span>
+          <span><span class="legend-dot" style="background:#6EB69C"></span>Revenue upside</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="savingsChart"></canvas>
+      </div>
+    </div>
+
+    <!-- ROI Timeline -->
+    <div class="roi-timeline">
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px;">Return on Investment Timeline</div>
+      <div style="font-size:12px;color:var(--text-muted);">Cumulative net savings including implementation costs and GMV uplift</div>
+      <div class="timeline-years">
+        <div class="timeline-year">
+          <div class="timeline-year-label">Year 1</div>
+          <div class="timeline-year-value" id="tl_yr1">$0</div>
+          <div class="timeline-year-cumulative" id="tl_yr1_inc">incl. implementation</div>
+        </div>
+        <div class="timeline-year">
+          <div class="timeline-year-label">Year 2</div>
+          <div class="timeline-year-value" id="tl_yr2">$0</div>
+          <div class="timeline-year-cumulative">cumulative</div>
+        </div>
+        <div class="timeline-year">
+          <div class="timeline-year-label">Year 3</div>
+          <div class="timeline-year-value" id="tl_yr3">$0</div>
+          <div class="timeline-year-cumulative">cumulative</div>
+        </div>
+      </div>
+      <div style="text-align:center">
+        <div class="payback-badge" id="payback_badge">⚡ Payback period: calculating...</div>
+      </div>
+    </div>
+
+    <!-- Insights -->
+    <div class="insights-grid">
+      <div class="insight-card">
+        <div class="insight-icon">🔗</div>
+        <div class="insight-title">Zero integration tax</div>
+        <div class="insight-body">As an existing Shopify Plus merchant, your ecom and POS share the same product catalogue, inventory, and customer data. No middleware, no sync errors, no integration spend.</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📊</div>
+        <div class="insight-title">Unified analytics</div>
+        <div class="insight-body">Single source of truth across all channels — online, in-store, and wholesale — in one admin. Eliminates the cost and latency of stitching together separate reporting systems.</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🎓</div>
+        <div class="insight-title">Staff already trained</div>
+        <div class="insight-body">Your team already uses Shopify. Training costs are minimal — staff learn POS in hours, not weeks. Industry benchmarks show 21% lower training costs vs. standalone POS systems.</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🚀</div>
+        <div class="insight-title">Unified commerce upside</div>
+        <div class="insight-body">Merchants who consolidate on Shopify see an average 8.9% GMV uplift from unified inventory, buy-online-pick-up-in-store, ship-from-store, and unified loyalty programmes.</div>
+      </div>
+    </div>
+
+  </div><!-- /results-col -->
+</div><!-- /main -->
+
+<div class="footer">
+  <p>Prepared by Shopify · <a href="mailto:kohulen.mahan@shopify.com">Kole Mahan, Account Executive ANZ</a></p>
+  <p style="margin-top:4px;">Benchmarks sourced from Shopify merchant research. All figures in AUD. This calculator provides indicative estimates — actual savings will vary based on your current contracts and usage. Contact your Shopify account team for a detailed proposal.</p>
+</div>
+
+<script>
+// ── PASSWORD GATE ──
+(function() {
+  if (sessionStorage.getItem('pos_tco_auth') === '1') {
+    document.getElementById('pw-gate').style.display = 'none';
+    if (sessionStorage.getItem('pos_tco_instructions') !== '1') {
+      document.getElementById('instructions-gate').style.display = 'flex';
+    }
+  } else {
+    setTimeout(() => document.getElementById('pw-input').focus(), 50);
+  }
+})();
+
+function checkPassword() {
+  const input = document.getElementById('pw-input');
+  const errorEl = document.getElementById('pw-error');
+  if (input.value === 'runningman') {
+    sessionStorage.setItem('pos_tco_auth', '1');
+    document.getElementById('pw-gate').style.display = 'none';
+    document.getElementById('instructions-gate').style.display = 'flex';
+  } else {
+    errorEl.textContent = 'Incorrect password. Please try again.';
+    input.value = '';
+    input.classList.remove('shake');
+    void input.offsetWidth;
+    input.classList.add('shake');
+    input.focus();
+  }
+}
+
+function dismissInstructions() {
+  sessionStorage.setItem('pos_tco_instructions', '1');
+  document.getElementById('instructions-gate').style.display = 'none';
+}
+
+// ── VERSION MANAGER ──
+const VERSIONS_KEY = 'pos_tco_versions';
+const INPUT_IDS = [
+  'industry', 'num_locations', 'staff_per_store',
+  'vendor', 'pos_cost_per_store', 'middleware_cost', 'it_support', 'training_per_store', 'contract_remaining',
+  'implementation_cost', 'shopify_training', 'shopify_it_support', 'shopify_integration',
+  'ecom_gmv', 'store_gmv', 'ecom_vpf', 'store_vpf',
+  'current_payments_rate', 'shopify_payments_rate',
+  'hardware_cost', 'hardware_discount',
+  'rev_gmv_lift', 'rev_bopis_adoption', 'rev_bopis_aov', 'rev_lost_sales', 'rev_cross_channel_pct', 'rev_ltv_premium'
+];
+
+function getVersions() {
+  try { return JSON.parse(localStorage.getItem(VERSIONS_KEY)) || []; }
+  catch { return []; }
+}
+
+function setVersions(versions) {
+  localStorage.setItem(VERSIONS_KEY, JSON.stringify(versions));
+}
+
+function captureInputs() {
+  const inputs = {};
+  INPUT_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) inputs[id] = el.value;
+  });
+  return inputs;
+}
+
+function restoreInputs(inputs) {
+  INPUT_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && inputs[id] !== undefined) el.value = inputs[id];
+  });
+}
+
+function saveCurrentVersion() {
+  const nameEl = document.getElementById('version_name_input');
+  const name = (nameEl.value || '').trim();
+  if (!name) { nameEl.focus(); nameEl.placeholder = 'Enter a name first…'; return; }
+  const versions = getVersions();
+  const existing = versions.findIndex(v => v.name === name);
+  const entry = { id: 'v_' + Date.now(), name, savedAt: new Date().toISOString(), inputs: captureInputs() };
+  if (existing >= 0) {
+    entry.id = versions[existing].id;
+    versions[existing] = entry;
+  } else {
+    versions.push(entry);
+  }
+  setVersions(versions);
+  nameEl.value = '';
+  nameEl.placeholder = 'Name this version…';
+  refreshVersionsUI(entry.id);
+}
+
+function loadSelectedVersion() {
+  const id = document.getElementById('versions_select').value;
+  if (!id) return;
+  const v = getVersions().find(v => v.id === id);
+  if (!v) return;
+  restoreInputs(v.inputs);
+  // Show vendor note without overwriting saved cost values
+  const vendor = document.getElementById('vendor').value;
+  const noteEl = document.getElementById('vendor_note');
+  if (vendorData[vendor]) {
+    noteEl.style.display = 'block';
+    noteEl.textContent = vendorData[vendor].note;
+  }
+  updateCalc();
+}
+
+function deleteSelectedVersion() {
+  const id = document.getElementById('versions_select').value;
+  if (!id) return;
+  const versions = getVersions().filter(v => v.id !== id);
+  setVersions(versions);
+  refreshVersionsUI();
+}
+
+function refreshVersionsUI(selectId) {
+  const versions = getVersions();
+  const sel = document.getElementById('versions_select');
+  sel.innerHTML = versions.length
+    ? versions.map(v => {
+        const d = new Date(v.savedAt);
+        const label = `${v.name} — ${d.toLocaleDateString('en-AU', { day:'numeric', month:'short' })} ${d.toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit' })}`;
+        return `<option value="${v.id}"${v.id === selectId ? ' selected' : ''}>${label}</option>`;
+      }).join('')
+    : '<option value="">— No saved versions —</option>';
+  const countEl = document.getElementById('versions_count');
+  countEl.textContent = versions.length ? `${versions.length} version${versions.length === 1 ? '' : 's'} saved` : '';
+}
+
+// ── VENDOR DEFAULTS ──
+const vendorData = {
+  lightspeed: {
+    name: 'Lightspeed / Vend',
+    pos_cost: 3000,
+    middleware: 4560,
+    it_factor: 1.0,
+    training: 1600,
+    note: 'Lightspeed Retail: ~$169–399 USD/month per location (~$2,000–5,800 AUD/year). Middleware (e.g. SKULabs, Brightpearl, or custom API) typically $2,400–6,000/year per store for Shopify sync.'
+  },
+  square: {
+    name: 'Square for Retail',
+    pos_cost: 1560,
+    middleware: 3480,
+    it_factor: 0.85,
+    training: 1200,
+    note: 'Square Retail Plus: ~$89 USD/month (~$1,560 AUD/year) + transaction fees. Shopify integration via third-party connector typically $1,800–4,200/year per store.'
+  },
+  myob: {
+    name: 'MYOB Advanced Retail',
+    pos_cost: 4200,
+    middleware: 5040,
+    it_factor: 1.2,
+    training: 2200,
+    note: 'MYOB Advanced Retail: typically $2,400–5,400 AUD/year per location. Custom integration to Shopify ecom commonly $3,600–6,000/year per store.'
+  },
+  aptos: {
+    name: 'Aptos',
+    pos_cost: 7800,
+    middleware: 6600,
+    it_factor: 1.5,
+    training: 3500,
+    note: 'Aptos enterprise POS: typically $60,000–180,000 AUD/year for mid-market deployments. Integration to ecommerce platforms requires significant custom middleware investment.'
+  },
+  newstore: {
+    name: 'NewStore',
+    pos_cost: 9000,
+    middleware: 7200,
+    it_factor: 1.6,
+    training: 3200,
+    note: 'NewStore enterprise: typically $72,000–216,000 AUD/year depending on location count and feature set. External ecom integration through custom APIs.'
+  },
+  teamwork: {
+    name: 'Teamwork Commerce',
+    pos_cost: 6240,
+    middleware: 5760,
+    it_factor: 1.3,
+    training: 2800,
+    note: 'Teamwork Commerce: mid-to-enterprise pricing, typically $4,800–8,400/year per location. API integration to Shopify ecom requires custom development or middleware.'
+  },
+  retail_pro: {
+    name: 'Retail Pro',
+    pos_cost: 5040,
+    middleware: 4560,
+    it_factor: 1.1,
+    training: 2000,
+    note: 'Retail Pro: ~$3,000–6,000 AUD/year per location for software license. Shopify integration typically via middleware such as Celigo, Boomi, or custom connectors.'
+  },
+  kwi: {
+    name: 'KWI',
+    pos_cost: 8160,
+    middleware: 6240,
+    it_factor: 1.4,
+    training: 3000,
+    note: 'KWI enterprise POS: typically $60,000–144,000 AUD/year for mid-market. Integration to separate ecommerce platform requires significant API/middleware investment.'
+  },
+  other: {
+    name: 'Custom / Other',
+    pos_cost: 3600,
+    middleware: 4800,
+    it_factor: 1.0,
+    training: 1800,
+    note: 'Adjust the cost fields above based on your current setup.'
+  }
+};
+
+let costChart, savingsChart, revenueChart;
+
+function onVendorChange() {
+  const vendor = document.getElementById('vendor').value;
+  const d = vendorData[vendor];
+  const locs = parseFloat(document.getElementById('num_locations').value) || 1;
+  document.getElementById('pos_cost_per_store').value = d.pos_cost * locs;
+  document.getElementById('middleware_cost').value = d.middleware * locs;
+  document.getElementById('training_per_store').value = d.training * locs;
+  // Pre-fill Shopify IT support as 11% of current (89% reduction benchmark)
+  const currItSupport = parseFloat(document.getElementById('it_support').value) || 30000;
+  document.getElementById('shopify_it_support').value = Math.round(currItSupport * 0.11);
+  const noteEl = document.getElementById('vendor_note');
+  noteEl.style.display = 'block';
+  noteEl.textContent = d.note;
+  updateCalc();
+}
+
+function fmt(n) {
+  if (Math.abs(n) >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1000) return '$' + Math.round(n/1000) + 'K';
+  return '$' + Math.round(n).toLocaleString();
+}
+
+function fmtFull(n) {
+  return '$' + Math.round(n).toLocaleString('en-AU');
+}
+
+function updateCalc() {
+  const locs = parseFloat(document.getElementById('num_locations').value) || 0;
+  const ecomGmv = parseFloat(document.getElementById('ecom_gmv').value) || 0;
+  const storeGmv = parseFloat(document.getElementById('store_gmv').value) || 0;
+  const ecomVpf = parseFloat(document.getElementById('ecom_vpf').value) || 0;
+  const storeVpf = parseFloat(document.getElementById('store_vpf').value) || 0;
+
+  const ecomPlatformCost = ecomGmv * (ecomVpf / 100);
+  const storePlatformCost = storeGmv * (storeVpf / 100);
+  document.getElementById('ecom_platform_cost_display').textContent = fmtFull(ecomPlatformCost);
+  document.getElementById('store_platform_cost_display').textContent = fmtFull(storePlatformCost);
+  document.getElementById('total_platform_cost_display').textContent = fmtFull(storePlatformCost);
+  const platformSavings = Math.max(0, (storeGmv * 0.0025) - (storeGmv * (storeVpf / 100)));
+  document.getElementById('platform_savings_display').textContent = fmtFull(platformSavings);
+
+  const currentPaymentsRate = parseFloat(document.getElementById('current_payments_rate').value) || 0;
+  const shopifyPaymentsRate = parseFloat(document.getElementById('shopify_payments_rate').value) || 0;
+  const currentPaymentsInvestment = storeGmv * (currentPaymentsRate / 100);
+  const shopifyPaymentsInvestment = storeGmv * (shopifyPaymentsRate / 100);
+  document.getElementById('current_payments_display').textContent = fmtFull(currentPaymentsInvestment);
+  document.getElementById('shopify_payments_display').textContent = fmtFull(shopifyPaymentsInvestment);
+  const paymentsSavings = Math.max(0, storeGmv * 0.0025);
+  document.getElementById('payments_savings_display').textContent = fmtFull(paymentsSavings);
+  const staffPerStore = parseFloat(document.getElementById('staff_per_store').value) || 0;
+
+  const posAnnual = parseFloat(document.getElementById('pos_cost_per_store').value) || 0;
+  const middlewareAnnual = parseFloat(document.getElementById('middleware_cost').value) || 0;
+  const itSupport = parseFloat(document.getElementById('it_support').value) || 0;
+  const trainingAnnual = parseFloat(document.getElementById('training_per_store').value) || 0;
+
+  const implCost = parseFloat(document.getElementById('implementation_cost').value) || 0;
+  const shopifyTraining = parseFloat(document.getElementById('shopify_training').value) || 0;
+  const shopifyItSupport = parseFloat(document.getElementById('shopify_it_support').value) || 0;
+  const shopifyIntegration = parseFloat(document.getElementById('shopify_integration').value) || 0;
+  const hardwareCostPerStore = parseFloat(document.getElementById('hardware_cost').value) || 0;
+  const hardwareDiscount = parseFloat(document.getElementById('hardware_discount').value) || 0;
+
+  // Hardware total
+  const hardwareGross = hardwareCostPerStore;
+  const hardwareDiscountAmount = hardwareGross * (hardwareDiscount / 100);
+  const hardwareTotal = hardwareGross - hardwareDiscountAmount;
+  document.getElementById('hardware_total_display').textContent = fmtFull(hardwareTotal);
+
+  // ── CURRENT COSTS (annual) ──
+  const currPos = posAnnual;
+  const currMiddleware = middlewareAnnual;
+  const currSupport = itSupport;
+  const currTrainingOngoing = trainingAnnual;
+  const currTotal = currPos + currMiddleware + currSupport + currTrainingOngoing + currentPaymentsInvestment;
+
+  // ── SHOPIFY POS COSTS (annual) ──
+  const shopifyMiddleware = shopifyIntegration;
+  const shopifySupport = shopifyItSupport;
+  const shopifyTrainingOngoing = shopifyTraining;
+  const shopifyTotal = storePlatformCost + shopifyMiddleware + shopifySupport + shopifyTrainingOngoing + shopifyPaymentsInvestment;
+
+  // ── SAVINGS ──
+  const annualSaving = currTotal - shopifyTotal;
+  const yr1Saving = annualSaving - implCost - (shopifyTraining) - hardwareTotal; // net of upfront
+  const yr2Saving = annualSaving;
+  const yr3Saving = annualSaving;
+
+  // ── REVENUE UPSIDE ──
+  const gmvLiftPct = parseFloat(document.getElementById('rev_gmv_lift').value) || 0;
+  const bopisAdoption = parseFloat(document.getElementById('rev_bopis_adoption').value) || 0;
+  const bopisAov = parseFloat(document.getElementById('rev_bopis_aov').value) || 0;
+  const lostSalesPct = parseFloat(document.getElementById('rev_lost_sales').value) || 0;
+  const crossChannelPct = parseFloat(document.getElementById('rev_cross_channel_pct').value) || 0;
+  const ltvPremium = parseFloat(document.getElementById('rev_ltv_premium').value) || 0;
+
+  const revGmvLift = storeGmv * (gmvLiftPct / 100);
+  const revBopis = ecomGmv * (bopisAdoption / 100) * (bopisAov / 100);
+  const revLostSales = storeGmv * (lostSalesPct / 100);
+  const revCrossChannel = (ecomGmv + storeGmv) * (crossChannelPct / 100) * (ltvPremium / 100);
+  const totalRevUpside = revGmvLift + revBopis + revLostSales + revCrossChannel;
+  const gmvUplift = revGmvLift;
+
+  // Cumulative benefit = annual cost saving + revenue upside per year (upfront costs handled by payback badge)
+  const cumulativeYr1 = annualSaving + totalRevUpside;
+  const cumulativeYr2 = (annualSaving * 2) + (totalRevUpside * 2);
+  const cumulativeYr3 = (annualSaving * 3) + (totalRevUpside * 3);
+
+  const net3yr = cumulativeYr3;
+
+  // ── UPDATE SUMMARY ──
+  document.getElementById('out_3yr_net').textContent = fmt(net3yr);
+  document.getElementById('out_3yr_sub').textContent = `${fmt(annualSaving * 3)} cost savings + ${fmt(totalRevUpside * 3)} revenue upside`;
+  document.getElementById('out_yr1_savings').textContent = fmt(Math.max(0, annualSaving));
+  document.getElementById('out_yr1_sub').textContent = `after ${fmt(implCost + shopifyTraining + hardwareTotal)} upfront investment`;
+  document.getElementById('out_rev_upside').textContent = fmt(totalRevUpside);
+  document.getElementById('out_gmv_uplift').textContent = fmt(gmvUplift);
+
+  // Timeline
+  document.getElementById('tl_yr1').textContent = fmt(cumulativeYr1);
+  document.getElementById('tl_yr2').textContent = fmt(cumulativeYr2);
+  document.getElementById('tl_yr3').textContent = fmt(cumulativeYr3);
+
+  // Payback period
+  const setupCost = implCost + (shopifyTraining) + hardwareTotal;
+  const monthlyRun = annualSaving / 12;
+  const paybackMonths = monthlyRun > 0 ? Math.ceil(setupCost / monthlyRun) : 999;
+  const pbEl = document.getElementById('payback_badge');
+  if (paybackMonths <= 0 || setupCost <= 0) {
+    pbEl.textContent = '⚡ Immediate ROI — savings begin day one';
+  } else if (paybackMonths <= 3) {
+    pbEl.textContent = `⚡ Payback period: ${paybackMonths} month${paybackMonths === 1 ? '' : 's'}`;
+  } else if (paybackMonths <= 12) {
+    pbEl.textContent = `⚡ Payback period: ${paybackMonths} months`;
+  } else if (paybackMonths <= 999) {
+    const yrs = (paybackMonths / 12).toFixed(1);
+    pbEl.textContent = `⚡ Payback period: ${yrs} years`;
+  } else {
+    pbEl.textContent = '⚠ Check inputs — savings may not cover setup';
+  }
+
+  // ── BREAKDOWN TABLE ──
+  const rows = [
+    ['POS Platform', currPos, storePlatformCost],
+    ['Integration / middleware', currMiddleware, shopifyIntegration, shopifyIntegration === 0],
+    ['IT & support', currSupport, shopifySupport],
+    ['Staff training (ongoing)', currTrainingOngoing, shopifyTrainingOngoing],
+    ['Payments', currentPaymentsInvestment, shopifyPaymentsInvestment],
+    ['Hardware (one-off)', 0, hardwareTotal],
+  ];
+  const tbody = document.getElementById('breakdown_body');
+  tbody.innerHTML = '';
+  let totalCurr = 0, totalShopify = 0;
+  rows.forEach(([label, curr, shopify, isZero]) => {
+    totalCurr += curr;
+    totalShopify += shopify;
+    const saving = curr - shopify;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${label}</td>
+      <td class="cost-current">${fmtFull(curr)}</td>
+      <td>${isZero ? '<span class="badge-zero">ZERO</span>' : fmtFull(shopify)}</td>
+      <td class="saving-cell">${saving >= 0 ? '+' : ''}${fmtFull(saving)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  const totalSaving = totalCurr - totalShopify;
+  const tfr = document.createElement('tr');
+  tfr.className = 'total-row';
+  tfr.innerHTML = `
+    <td>Total annual</td>
+    <td>${fmtFull(totalCurr)}</td>
+    <td>${fmtFull(totalShopify)}</td>
+    <td class="saving-cell">${totalSaving >= 0 ? '+' : ''}${fmtFull(totalSaving)}</td>
+  `;
+  tbody.appendChild(tfr);
+
+  // ── TOTAL SHOPIFY DISCOUNT ──
+  const totalDiscount = platformSavings + paymentsSavings + hardwareDiscountAmount;
+  document.getElementById('summary_platform_savings').textContent = fmtFull(platformSavings);
+  document.getElementById('summary_payments_savings').textContent = fmtFull(paymentsSavings);
+  document.getElementById('summary_hardware_discount').textContent = fmtFull(hardwareDiscountAmount);
+  document.getElementById('total_shopify_discount').textContent = fmtFull(totalDiscount);
+
+  // ── REVENUE BREAKDOWN TABLE ──
+  const revenueRows = [
+    ['Unified commerce GMV lift', `${gmvLiftPct}% of in-store GMV`, revGmvLift],
+    ['BOPIS / Click & Collect', `${bopisAdoption}% adoption × ${bopisAov}% AOV premium`, revBopis],
+    ['Lost sales recovery', `${lostSalesPct}% of in-store GMV`, revLostSales],
+    ['Cross-channel LTV uplift', `${crossChannelPct}% of customers × ${ltvPremium}% LTV premium`, revCrossChannel],
+  ];
+  const revTbody = document.getElementById('revenue_breakdown_body');
+  revTbody.innerHTML = '';
+  revenueRows.forEach(([label, assumption, value]) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${label}</td>
+      <td style="color:var(--text-muted);font-size:11px;">${assumption}</td>
+      <td class="saving-cell">${fmtFull(value)}</td>
+      <td style="color:var(--text-secondary)">${fmtFull(value * 3)}</td>
+    `;
+    revTbody.appendChild(tr);
+  });
+  const revTotalRow = document.createElement('tr');
+  revTotalRow.className = 'total-row';
+  revTotalRow.innerHTML = `
+    <td>Total annual revenue upside</td>
+    <td></td>
+    <td class="saving-cell">${fmtFull(totalRevUpside)}</td>
+    <td>${fmtFull(totalRevUpside * 3)}</td>
+  `;
+  revTbody.appendChild(revTotalRow);
+
+  // ── CHARTS ──
+  updateCostChart(rows, totalCurr, totalShopify);
+  updateSavingsChart(annualSaving, annualSaving, annualSaving, totalRevUpside);
+  updateRevenueChart(revenueRows);
+}
+
+function updateCostChart(rows, totalCurr, totalShopify) {
+  const ctx = document.getElementById('costCompareChart').getContext('2d');
+
+  const shortLabel = {
+    'POS Platform': 'POS',
+    'Integration / middleware': 'Integration',
+    'IT & support': 'IT & Support',
+    'Staff training (ongoing)': 'Training',
+    'Payments': 'Payments',
+    'Hardware (one-off)': 'Hardware',
+  };
+
+  const chartLabels = rows.map(r => shortLabel[r[0]] || r[0]);
+  const currValues = rows.map(r => r[1]);
+  const shopifyValues = rows.map(r => r[2]);
+
+  if (costChart) costChart.destroy();
+  costChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: chartLabels,
+      datasets: [
+        {
+          label: 'Current',
+          data: currValues,
+          backgroundColor: 'rgba(17,17,17,0.80)',
+          borderColor: '#111111',
+          borderWidth: 1,
+          borderRadius: 3,
+        },
+        {
+          label: 'Shopify POS',
+          data: shopifyValues,
+          backgroundColor: 'rgba(110,182,156,0.85)',
+          borderColor: '#6EB69C',
+          borderWidth: 1,
+          borderRadius: 3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (c) => ` ${c.dataset.label}: $${Math.round(c.parsed.y).toLocaleString('en-AU')}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 0 } },
+        y: {
+          ticks: { font: { size: 11 }, callback: (v) => '$' + (v >= 1000 ? Math.round(v/1000) + 'K' : v) },
+          grid: { color: '#ECECEC' }
+        }
+      }
+    }
+  });
+}
+
+function updateRevenueChart(rows) {
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  const labels = rows.map(r => r[0]);
+  const values = rows.map(r => r[2]);
+
+  if (revenueChart) revenueChart.destroy();
+  revenueChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Annual Revenue Upside',
+        data: values,
+        backgroundColor: 'rgba(110,182,156,0.85)',
+        borderColor: '#6EB69C',
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (c) => ` $${Math.round(c.parsed.x).toLocaleString('en-AU')}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#ECECEC' },
+          ticks: { font: { size: 11 }, callback: (v) => '$' + (v >= 1000 ? Math.round(v/1000) + 'K' : v) }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { size: 11 } }
+        }
+      }
+    }
+  });
+}
+
+function updateSavingsChart(yr1, yr2, yr3, revUpside) {
+  const ctx = document.getElementById('savingsChart').getContext('2d');
+  const cumCost1 = yr1;
+  const cumCost2 = yr1 + yr2;
+  const cumCost3 = yr1 + yr2 + yr3;
+  const cumRev1 = revUpside;
+  const cumRev2 = revUpside * 2;
+  const cumRev3 = revUpside * 3;
+
+  if (savingsChart) savingsChart.destroy();
+  savingsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Year 1', 'Year 2', 'Year 3'],
+      datasets: [
+        {
+          label: 'Cost savings',
+          data: [cumCost1, cumCost2, cumCost3],
+          backgroundColor: 'rgba(17,17,17,0.80)',
+          borderColor: '#111111',
+          borderWidth: 1,
+          borderRadius: 3,
+          stack: 'benefit',
+        },
+        {
+          label: 'Revenue upside',
+          data: [cumRev1, cumRev2, cumRev3],
+          backgroundColor: 'rgba(110,182,156,0.85)',
+          borderColor: '#6EB69C',
+          borderWidth: 1,
+          borderRadius: 3,
+          stack: 'benefit',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (c) => ` ${c.dataset.label}: $${Math.round(c.parsed.y).toLocaleString('en-AU')}`
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 12 } } },
+        y: {
+          stacked: true,
+          ticks: { font: { size: 11 }, callback: (v) => '$' + (Math.abs(v) >= 1000 ? Math.round(v/1000) + 'K' : v) },
+          grid: { color: '#ECECEC' }
+        }
+      }
+    }
+  });
+}
+
+function resetForm() {
+  document.getElementById('num_locations').value = 3;
+  document.getElementById('ecom_gmv').value = 5000000;
+  document.getElementById('store_gmv').value = 2000000;
+  document.getElementById('ecom_vpf').value = 0.25;
+  document.getElementById('store_vpf').value = 0.20;
+  document.getElementById('shopify_it_support').value = 3300;
+  document.getElementById('shopify_integration').value = 0;
+  document.getElementById('current_payments_rate').value = 1.75;
+  document.getElementById('shopify_payments_rate').value = 1.40;
+  document.getElementById('hardware_cost').value = 2500;
+  document.getElementById('hardware_discount').value = 0;
+  document.getElementById('staff_per_store').value = 5;
+  document.getElementById('vendor').value = 'lightspeed';
+  document.getElementById('implementation_cost').value = 5000;
+  document.getElementById('shopify_training').value = 1200;
+  document.getElementById('it_support').value = 30000;
+  document.getElementById('contract_remaining').value = 0;
+  document.getElementById('rev_gmv_lift').value = 8.9;
+  document.getElementById('rev_bopis_adoption').value = 5;
+  document.getElementById('rev_bopis_aov').value = 15;
+  document.getElementById('rev_lost_sales').value = 3;
+  document.getElementById('rev_cross_channel_pct').value = 15;
+  document.getElementById('rev_ltv_premium').value = 25;
+  onVendorChange();
+}
+
+// ── INIT ──
+refreshVersionsUI();
+onVendorChange();
+</script>
+</body>
+</html>
